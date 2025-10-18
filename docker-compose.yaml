@@ -1,0 +1,32 @@
+services:
+  db:
+    image: mysql:8.0
+    restart: always # <-- Garante que o DB sempre reinicie
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: dados_governo
+    ports:
+      # Mapeia a porta 3307 do seu PC para a porta 3306 do contêiner.
+      # Útil para conectar o MySQL Workbench para depuração.
+      - "3307:3306" 
+    volumes:
+      # Cria um volume chamado 'mysql_data' para persistir os dados do banco.
+      - mysql_data:/var/lib/mysql
+
+  app:
+    build: .
+    restart: always # <-- Garante que o app sempre reinicie
+    depends_on: 
+      - db
+    ports:
+      # Mapeia a porta 8501 do seu PC para a porta 8501 do contêiner.
+      # É assim que você acessa o dashboard no navegador.
+      - "8501:8501"
+    volumes:
+      # Espelha a pasta atual do seu projeto para a pasta /app dentro do contêiner.
+      # Permite live-reload das suas alterações no código!
+      - .:/app
+
+# Define o volume nomeado que será usado pelo serviço 'db'.
+volumes:
+  mysql_data:
