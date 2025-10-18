@@ -185,8 +185,6 @@ colunas_para_operacoes = [
 df_principal_final_filtrado = df_principal_final[colunas_para_operacoes]
 
 
-#engine = create_engine(f"mysql+mysqlconnector://root:root@db:3306/dados_governo")
-
 print("Iniciando verificação do banco de dados...")
 
 db_user = "root"
@@ -203,16 +201,15 @@ server_engine_url = f"mysql+mysqlconnector://{db_user}:{db_password}@{db_host}:{
 
 for i in range(retries):
     try:
-        
+
         temp_engine = create_engine(server_engine_url)
         with temp_engine.connect() as conn:
-            # 2. Se conectar, TENTA CRIAR O BANCO DE DADOS
             conn.execute(text(f"CREATE DATABASE IF NOT EXISTS {db_name}"))
-            conn.commit() # Importante para DDL (Data Definition Language)
+            conn.commit()
         
         temp_engine.dispose()
         print(f"Banco de dados '{db_name}' verificado/criado com sucesso.")
-        break # Conseguiu, sai do loop
+        break
 
     except OperationalError:
         print(f"Servidor MySQL ainda não está pronto... tentativa {i+1} de {retries}.")
@@ -220,17 +217,17 @@ for i in range(retries):
             time.sleep(5)
         else:
             print("Não foi possível conectar ao servidor MySQL após várias tentativas.")
-            exit(1) # Sai do script com erro
+            exit(1)
     except Exception as e:
         print(f"Erro inesperado ao criar/verificar o DB: {e}")
         exit(1)
 
-# 3. Agora, cria o 'engine' final que se conecta DIRETAMENTE AO BANCO
+# 3. conecta DIRETAMENTE AO BANCO
 try:
     engine_url = f"mysql+mysqlconnector://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
     engine = create_engine(engine_url)
     with engine.connect() as conn:
-        pass # Testa a conexão
+        pass 
     print(f"Conexão com o banco de dados '{db_name}' estabelecida!")
 except Exception as e:
     print(f"Erro ao conectar ao banco de dados '{db_name}': {e}")
