@@ -3,7 +3,7 @@ import pandas as pd
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import OperationalError, ProgrammingError
 import time
-import altair as alt # Importamos a nova biblioteca de gráficos
+import altair as alt
 
 # --- Configurações da Página ---
 st.set_page_config(
@@ -59,19 +59,19 @@ def load_data():
         if conn_status != "success":
             return None, "connection_error_from_load"
 
-        # --- NOVA CONSULTA SQL ---
-        # Trazemos agora a 'origem' e agrupamos os 'eixos' para evitar
-        # duplicar valores caso uma operação pertença a mais de um eixo.
         query = """
         SELECT 
             op.id_operacao,
             op.valor_investimento_previsto,
             op.tomador_nome,
             op.origem_fontes_de_recurso,
-            GROUP_CONCAT(DISTINCT ex.descricao_eixo SEPARATOR ', ') AS eixo_descricao
+            GROUP_CONCAT(DISTINCT ex.descricao_eixo SEPARATOR ', ') AS eixo_descricao,
+            GROUP_CONCAT(DISTINCT tp.descricao_tipo SEPARATOR ', ') AS tipo_descricao
         FROM operacoes op
         LEFT JOIN operacao_eixo_rel oe ON op.id_operacao = oe.id_operacao
         LEFT JOIN eixos ex ON oe.id_eixo = ex.id_eixo
+        LEFT JOIN operacao_tipo_rel otr ON op.id_operacao = otr.id_operacao
+        LEFT JOIN tipos tp ON otr.id_tipo = tp.id_tipo
         GROUP BY 
             op.id_operacao,
             op.valor_investimento_previsto,
@@ -82,6 +82,7 @@ def load_data():
         
         # Limpeza pós-query: preencher valores nulos para gráficos
         df['eixo_descricao'] = df['eixo_descricao'].fillna('Não Categorizado')
+        df['tipo_descricao'] = df['tipo_descricao'].fillna('Não Categorizado')
         df['origem_fontes_de_recurso'] = df['origem_fontes_de_recurso'].fillna('Não Informada')
         
         if df.empty:
@@ -109,12 +110,11 @@ if 'show_data' not in st.session_state:
 if st.button("Iniciar Análise (Carregar Dados)"):
     st.session_state.show_data = True
 
-# 3. Bloco de Lógica Principal (Só executa após o clique)
+# 3. Bloco de Lógica Principal
 if st.session_state.show_data:
     
     with st.spinner("Conectando ao banco de dados e carregando dados..."):
         
-        # 1. Tenta obter a conexão
         engine, conn_status = get_connection()
 
         if conn_status == "connection_error":
@@ -132,14 +132,16 @@ if st.session_state.show_data:
             num_operacoes = len(df)
             media_valor = df['valor_investimento_previsto'].mean()
             num_eixos = df['eixo_descricao'].nunique()
+            num_tipos = df['tipo_descricao'].nunique()
             num_origens = df['origem_fontes_de_recurso'].nunique()
 
-            col1, col2, col3, col4, col5 = st.columns(5)
+            col1, col2, col3, col4, col5= st.columns(5)
             col1.metric("Valor Total Previsto", f"R$ {total_valor:,.2f}")
             col2.metric("Nº de Operações", f"{num_operacoes}")
             col3.metric("Valor Médio/Operação", f"R$ {media_valor:,.2f}")
             col4.metric("Nº de Eixos", f"{num_eixos}")
             col5.metric("Nº de Origens de Recurso", f"{num_origens}")
+            
 
             st.markdown("---")
             
@@ -148,18 +150,18 @@ if st.session_state.show_data:
             col_graf_1, col_graf_2 = st.columns(2)
 
             with col_graf_1:
-                # --- VISUALIZAÇÃO 2: Valor por Origem de Recurso (Gráfico de Pizza) ---
-                st.markdown("#### Valor por Origem de Recurso")
-                df_origem = df.groupby('origem_fontes_de_recurso')['valor_investimento_previsto'].sum().reset_index()
+                # --- VISUALIZAÇÃO 2: Valor por Tipo/Espécie (Gráfico de Pizza) ---
+                st.markdown("#### Valor por Tipo (Espécie)")
+                df_tipo = df.groupby('tipo_descricao')['valor_investimento_previsto'].sum().reset_index()
                 
-                # Gráfico de pizza com Altair
-                base = alt.Chart(df_origem).encode(
+                # Gráfico de pizza
+                base = alt.Chart(df_tipo).encode(
                    theta=alt.Theta("valor_investimento_previsto", stack=True)
                 )
                 pie = base.mark_arc(outerRadius=120).encode(
-                    color=alt.Color("origem_fontes_de_recurso", title="Origem"),
+                    color=alt.Color("tipo_descricao", title="Tipo"), 
                     order=alt.Order("valor_investimento_previsto", sort="descending"),
-                    tooltip=["origem_fontes_de_recurso", "valor_investimento_previsto"]
+                    tooltip=["tipo_descricao", "valor_investimento_previsto"]
                 )
                 st.altair_chart(pie, use_container_width=True)
 
