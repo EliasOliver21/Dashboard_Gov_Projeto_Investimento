@@ -2,7 +2,7 @@
 
 Este repositório tem como objetivo documentar a criação de um dashboard, para analisar os dados contidos na [API: Consulta Cadastro Integrado de Projetos de Investimentos](https://www.gov.br/conecta/catalogo/apis/consulta-cadastro-integrado-de-projetos-de-investimentos-2013-obrasgov.br).
 
-# Ferramentas
+## Ferramentas
 
 Para a criação deste projeto, foram utilizadas as seguintes ferramentas e tecnologias:
 
@@ -25,26 +25,23 @@ Para a criação deste projeto, foram utilizadas as seguintes ferramentas e tecn
 
 Para executar o projeto, inicialmente, garanta que o [python 3.12.3](https://www.python.org/downloads/) esteja instalado e atualizado.
 
+## Clone o repositório
+
 ```bash
-# Clone o repositório
-
 git clone https://github.com/EliasOliver21/Dashboard_Gov_Projeto_Investimento.git
-
-# Entre no diretório do projeto
-
+```
+## Entre no diretório do projeto
+```bash
 cd Dashboard_Gov_Projeto_Investimento
-
-# Crie um ambiente virtual
-
+```
+## Crie um ambiente virtual
+```bash
 python3 -m venv venv
+```
+## Use o ambiente
 
-# Use o ambiente
-
+```bash
 source venv/bin/activate
-
-# Instale as dependências
-
-pip install -r requirements.txt
 
 ```
 
@@ -52,20 +49,21 @@ pip install -r requirements.txt
 
 Para executar o projeto você precisa ter instalado o docker em sua máquina, siga o guia de [instalação oficial do docker](https://docs.docker.com/desktop/setup/install/windows-install/).
 
-```bash
-# Verifique o status do docker
+## Verifique o status do docker
 
+```bash
 sudo systemctl status docker
 
-# Execute o o teste "hello-world" para ver se está tudo funcionando
-
+```
+## Execute o o teste "hello-world" para ver se está tudo funcionando
+```bash
 docker run hello-world
 
 ```
 
-```bash
-# Agora execute o comando para construir os conteineres e ativá-los
+## Agora execute o comando para construir os conteineres e ativá-los
 
+```bash
 docker compose up --build
 
 ```
