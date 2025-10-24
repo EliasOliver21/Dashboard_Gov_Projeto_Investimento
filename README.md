@@ -34,7 +34,7 @@ git clone https://github.com/EliasOliver21/Dashboard_Gov_Projeto_Investimento.gi
 ```bash
 cd Dashboard_Gov_Projeto_Investimento
 ```
-## Crie um ambiente virtual
+## Se desejar, crie um ambiente virtual e instale as dependências para realizar testes
 ```bash
 python3 -m venv venv
 ```
@@ -42,6 +42,12 @@ python3 -m venv venv
 
 ```bash
 source venv/bin/activate
+
+```
+## Instale as dependências
+
+```bash
+pip install -r requirements.txt
 
 ```
 
